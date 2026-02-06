@@ -37,7 +37,6 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            // Usamos el tema por defecto de tu proyecto
             Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
                 PantallaFormulario()
             }
@@ -56,7 +55,6 @@ fun PantallaFormulario() {
     var email by remember { mutableStateOf("") }
     var photoBitmap by remember { mutableStateOf<Bitmap?>(null) }
 
-    // Launchers para Cámara (Mantenlos igual)
     val takePictureLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicturePreview()
     ) { bitmap -> if (bitmap != null) photoBitmap = bitmap }
@@ -65,7 +63,6 @@ fun PantallaFormulario() {
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted -> if (isGranted) takePictureLauncher.launch() }
 
-    // El contenedor principal (Reemplaza al ConstraintLayout)
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -73,7 +70,6 @@ fun PantallaFormulario() {
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // 1. ImageView (photo)
         if (photoBitmap != null) {
             Image(
                 bitmap = photoBitmap!!.asImageBitmap(),
@@ -81,7 +77,6 @@ fun PantallaFormulario() {
                 modifier = Modifier.size(150.dp).padding(top = 20.dp)
             )
         } else {
-            // Un icono temporal si no hay foto
             Icon(
                 imageVector = Icons.Default.AccountCircle,
                 contentDescription = null,
@@ -89,7 +84,6 @@ fun PantallaFormulario() {
             )
         }
 
-        // 2. Button (btnPhoto)
         Button(
             onClick = {
                 val permissionCheck = ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA)
@@ -101,7 +95,6 @@ fun PantallaFormulario() {
             Text("Tomar Foto")
         }
 
-        // 3. EditTexts (names, surnames, age, email)
         OutlinedTextField(
             value = names,
             onValueChange = { names = it },
@@ -119,8 +112,6 @@ fun PantallaFormulario() {
         OutlinedTextField(
             value = age,
             onValueChange = { nuevoTexto ->
-                // VALIDACIÓN: Solo actualiza el estado si el texto son números
-                // "it.all { it.isDigit() }" verifica que cada caracter sea un número
                 if (nuevoTexto.all { it.isDigit() }) {
                     age = nuevoTexto
                 }
@@ -129,7 +120,6 @@ fun PantallaFormulario() {
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 10.dp),
-            // Esto abre el teclado numérico automáticamente
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Number,
                 imeAction = ImeAction.Next
@@ -146,11 +136,10 @@ fun PantallaFormulario() {
 
         Spacer(modifier = Modifier.height(30.dp))
 
-        // 4. Button (btnAgregar)
         Button(
             onClick = {
                 saveToDatabase(context, names, surnames, age, email) {
-                    // Limpiar campos después de guardar
+
                     names = ""; surnames = ""; age = ""; email = ""; photoBitmap = null
                 }
             },
@@ -161,7 +150,6 @@ fun PantallaFormulario() {
     }
 }
 
-// Lógica de SQLite (Separada para orden)
 fun saveToDatabase(context: Context, n: String, s: String, a: String, e: String, onComplete: () -> Unit) {
     try {
         val dbHelper = SQLiteConnection(context, Transactions.dbname, null, Transactions.dbversion)
@@ -177,7 +165,7 @@ fun saveToDatabase(context: Context, n: String, s: String, a: String, e: String,
 
         val res = db.insert(Transactions.tbpersons, Transactions.id, values)
         if (res > 0) {
-            Toast.makeText(context, "Insertado con éxito ID: $res", Toast.LENGTH_LONG).show()
+            Toast.makeText(context, "Registro ingresado: $res", Toast.LENGTH_LONG).show()
             onComplete()
         }
         db.close()
